@@ -22,13 +22,13 @@
           {{ locale.format(date, 'WWW') }}
         </span>
         <span class="vc-month">
-          {{ locale.format(date, 'MMM') }}
+          {{ jalaliDate.jm }}
         </span>
         <span class="vc-day">
-          {{ locale.format(date, 'D') }}
+          {{ jalaliDate.jd }}
         </span>
         <span class="vc-year">
-          {{ locale.format(date, 'YYYY') }}
+          {{ jalaliDate.jy }}
         </span>
       </div>
       <div class="vc-time">
@@ -63,6 +63,7 @@
 <script>
 import TimeSelect from './TimeSelect';
 import { arrayHasItems } from '../utils/helpers';
+import { toJalaali } from 'jalaali-js';
 
 const _amOptions = [
   { value: 0, label: '12' },
@@ -78,6 +79,7 @@ const _amOptions = [
   { value: 10, label: '10' },
   { value: 11, label: '11' },
 ];
+
 const _pmOptions = [
   { value: 12, label: '12' },
   { value: 13, label: '1' },
@@ -113,6 +115,14 @@ export default {
         date = new Date(date.getTime() - 1);
       }
       return date;
+    },
+    jalaliDate() {
+      const gregorianDate = this.date;
+      return toJalaali(
+        gregorianDate.getFullYear(),
+        gregorianDate.getMonth() + 1,
+        gregorianDate.getDate(),
+      );
     },
     hours: {
       get() {
@@ -155,9 +165,9 @@ export default {
       );
     },
     hourOptions_() {
-      if (this.is24hr) return this.hourOptions;
-      if (this.isAM) return this.amHourOptions;
-      return this.pmHourOptions;
+      if (this.is24hr) return;
+      this.hourOptions;
+      return this.isAM ? this.amHourOptions : this.pmHourOptions;
     },
     amDisabled() {
       return !arrayHasItems(this.amHourOptions);
@@ -168,15 +178,7 @@ export default {
   },
   methods: {
     updateValue(hours, minutes) {
-      if (hours !== this.hours || minutes !== this.minutes) {
-        this.$emit('input', {
-          ...this.value,
-          hours,
-          minutes,
-          seconds: 0,
-          milliseconds: 0,
-        });
-      }
+      this.$emit('input', { hours, minutes });
     },
   },
 };
